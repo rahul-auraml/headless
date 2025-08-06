@@ -1,10 +1,10 @@
 import time
 import threading
-from simulation_manager import run_isaac_sim, shutdown, keep_alive, set_keep_running
+from simulation_manager import run_isaac_sim, shutdown, keep_alive, set_keep_running, start_simulation
 
 # Configuration
 USD_PATH = "https://omniverse-content-production.s3-us-west-2.amazonaws.com/Assets/Isaac/4.5/Isaac/Environments/Simple_Warehouse/warehouse.usd"  # Change this to your USD file path
-TIMEOUT = 60  # Timeout for stage loading in seconds
+TIMEOUT = 200  # Timeout for stage loading in seconds
 
 def timeout_monitor():
     """Background thread to monitor timeout"""
@@ -28,6 +28,14 @@ def main():
         return
     
     print("Simulation started with USD path:", USD_PATH)
+    
+    # Start the simulation playback
+    print("Starting simulation playback...")
+    if start_simulation():
+        print("Simulation is now running!")
+    else:
+        print("Failed to start simulation playback")
+        return
     
     # Start timeout monitor in background thread
     timeout_thread = threading.Thread(target=timeout_monitor, daemon=True)

@@ -37,6 +37,26 @@ class SimulationSetup:
         
         print("Simulation setup complete.")
         
+    def start_simulation(self):
+        """Start the simulation playback."""
+        print("Starting simulation playback...")
+        try:
+            # Get the timeline interface to control playback
+            import omni.timeline
+            timeline = omni.timeline.get_timeline_interface()
+            
+            if timeline:
+                timeline.play()
+                print("Simulation playback started successfully")
+                return True
+            else:
+                print("Failed to get timeline interface")
+                return False
+                
+        except Exception as e:
+            print(f"Error starting simulation: {e}")
+            return False
+        
     def _open_stage_sync(self, url: str):
         """Opens the provided USD stage synchronously."""
         print(f"Loading USD file: {url}")
@@ -136,6 +156,16 @@ def shutdown():
         _global_sim_setup = None
     else:
         print("No simulation to shutdown.")
+
+
+def start_simulation():
+    """Global function to start simulation playback."""
+    global _global_sim_setup
+    if _global_sim_setup:
+        return _global_sim_setup.start_simulation()
+    else:
+        print("No simulation setup available to start.")
+        return False
 
 
 def keep_alive():
