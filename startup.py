@@ -1,7 +1,7 @@
 import time
 import threading
 from simulation_manager import run_isaac_sim, shutdown, keep_alive, set_keep_running, start_simulation
-from docker_manager import run_docker, check_image, stop_container
+from docker_manager import run_docker, check_image, stop_and_remove_container
 
 # Configuration
 USD_PATH = "https://omniverse-content-production.s3-us-west-2.amazonaws.com/Assets/Isaac/4.5/Isaac/Environments/Simple_Warehouse/warehouse.usd"  # Change this to your USD file path
@@ -78,12 +78,12 @@ def main():
     # Ensure clean shutdown
     print("=== Aura CI Manager Shutting Down ===")
     
-    # Stop robot container if it's running
-    print("Stopping robot container...")
-    if stop_container("robot_container"):
-        print("✅ Robot container stopped successfully")
+    # Stop and remove robot container
+    print("Stopping and removing robot container...")
+    if stop_and_remove_container("robot_container"):
+        print("✅ Robot container stopped and removed successfully")
     else:
-        print("⚠️  Robot container may not have been running or failed to stop")
+        print("⚠️  Robot container may not have been running or failed to stop/remove")
     
     # Shutdown simulation
     shutdown()
