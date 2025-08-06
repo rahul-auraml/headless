@@ -354,6 +354,67 @@ class DockerManager:
         except Exception as e:
             logger.error(f"Error stopping container '{container_id}': {e}")
             return False
+    
+    def remove_container(self, container_id: str, force: bool = False) -> bool:
+        """
+        Remove a Docker container.
+        
+        Args:
+            container_id (str): Container ID or name
+            force (bool): Force remove the container (even if running)
+            
+        Returns:
+            bool: True if successful, False otherwise
+        """
+        if not self.docker_available:
+            logger.error("Docker is not available")
+            return False
+        
+        try:
+            cmd = ["docker", "rm"]
+            if force:
+                cmd.append("-f")
+            cmd.append(container_id)
+            
+            result = subprocess.run(
+                cmd,
+                capture_output=True,
+                text=True,
+                timeout=30
+            )
+            
+            if result.returncode == 0:
+                logger.info(f"Successfully removed container '{container_id}'")
+                return True
+            else:
+                logger.error(f"Failed to remove container '{container_id}': {result.stderr}")
+                return False
+                
+        except Exception as e:
+            logger.error(f"Error removing container '{container_id}': {e}")
+            return False
+    
+    def stop_and_remove_container(self, container_id: str) -> bool:
+        """
+        Stop and remove a Docker container.
+        
+        Args:
+            container_id (str): Container ID or name
+            
+        Returns:
+            bool: True if both operations successful, False otherwise
+        """
+        if not self.docker_available:
+            logger.error("Docker is not available")
+            return False
+        
+        # First try to stop the container
+        stop_success = self.stop_container(container_id)
+        
+        # Then remove it (force remove if stop failed)
+        remove_success = self.remove_container(container_id, force=not stop_success)
+        
+        return stop_success and remove_success
 
 
 # Global Docker manager instance
@@ -390,3 +451,11 @@ def list_containers(all_containers: bool = False) -> List[Dict]:
 def stop_container(container_id: str) -> bool:
     """Stop a running Docker container."""
     return get_docker_manager().stop_container(container_id)
+
+def remove_container(container_id: str, force: bool = False) -> bool:
+    """Remove a Docker container."""
+    return get_docker_manager().remove_container(container_id, force)
+
+def stop_and_remove_container(container_id: str) -> bool:
+    """Stop and remove a Docker container."""
+    return get_docker_manager().stop_and_remove_container(container_id)
